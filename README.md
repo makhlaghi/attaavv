@@ -32,8 +32,10 @@ Running the example:
 ----------------------------------------
 In order to test run the example, put the two .h and .c files in the
 src directory and run ($ is the shell prompt on the command line):
-$ make
-$ ./ui
+
+    $ make
+    $ ./ui
+
 A text file called tempcat.txt should be made showing the data it 
 read from the ascii data in the data folder.
 
@@ -44,18 +46,22 @@ In case you want your output to be two dimensional, you can simply
 create a pointer to a pointer array on top of the output:
 
 <-- In the declarations: -->
+
     int i;
     double **TwoDarray;
 
 <-- After calling readasciitable -->
+
     TwoDarray=malloc(intable.s0 * sizeof(double *));
     for (i = 0; i < intable.s0; i++)
         TwoDarray[i] = &intable.d[i*intable.s1];
 
 <-- To test it: -->
+
     printf("%f\n", TwoDarray[0][2]);
 
 <-- Free the space in the end -->
+
     free(TwoDarray);
 
 ----------------------------------------
@@ -90,10 +96,14 @@ Comments and suggestions:
 ----------------------------------------
 If you have any suggestions for improvements or find any problems 
 in the program please contact me at 
+
 makhlaghi@gmail.com 
+
 akhlaghi@astr.tohoku.ac.jp
 
 ----------------------------------------
 Mohammad Akhlaghi
+
 http://astr.tohoku.ac.jp/~akhlaghi/
+
 12 July 2013.
