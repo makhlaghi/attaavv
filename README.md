@@ -78,6 +78,7 @@ int_cols:   This array tells the function which columns are integers.
             The last element has to be negative in order to signal
             the end. The minimum space parameter for the %-[minspace]d
             is set by space[0].
+            
 accu_cols:  In some cases, we are dealing with a float that requires
             very high accuracy compared to the other inputs, in this
             case you can specify which columns have this condition
@@ -85,8 +86,10 @@ accu_cols:  In some cases, we are dealing with a float that requires
             be -1. The formatting for these columns will be assumed 
             to be like this: %-[minspace].[numdecimals]f, [minspace]
             is determined by space[2] and [numdecimals] by prec[1].
+            
 space:      This array shows how much space should be allocated to 
             each kind of column as explained above.
+            
 prec:       This array shows the level of precision (significant 
             numbers for the general type and number of decimal points
             for the extra precision columns) as explained above.
