@@ -22,11 +22,6 @@ the example file for a simple example.
 
 The program has lots of comments to explain every step.
 
-The output is a 1D array containing all the data which you can use
-by indexing the output with [i*n2+j] where n2 is the second
-axis size and i and j are the first and second axis indexes 
-respectively. To convert to a 2D array read bellow.
-
 ----------------------------------------
 Output structure
 ----------------------------------------
@@ -38,6 +33,12 @@ in attaavv.h. The components include (in order):
 3. Number of rows (zeroth axis) in the data table.
 4. Number of columns (first axis) in the data table.
 5. Data array (1D).
+
+The 5th element of the output structure (the data in the table) 
+is a 1D array containing all the data which you can use
+by indexing the output with [i*n2+j] where n2 is the second
+axis size and i and j are the first and second axis indexes 
+respectively. To convert to a 2D array read bellow. 
 
 
 ----------------------------------------
