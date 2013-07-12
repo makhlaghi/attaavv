@@ -125,7 +125,7 @@ prec[0] inputs.
             integers. The last element has to be negative in order 
             to signal the end of this array. The minimum space 
             parameter, used in printf, for the specified columns is 
-            %-[minspace]d. [minspace] is set by space[0].</li>
+            %-[minspace].0f. [minspace] is set by space[0].</li>
 <li><b>accu_cols:</b>In some cases, we are dealing with a float that 
             requires very high accuracy compared to the other inputs 
             (last column in the example data). In such cases you can 
