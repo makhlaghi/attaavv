@@ -107,10 +107,11 @@ Formatting input parameters to writeasciitable
 ----------------------------------------
 writeasciitable receives four input arrays, besides the table structure
 and the output name, they are: <b>int_cols</b>, <b>accu_cols</b>, 
-<b>space</b>, <b>prec</b>. writeasciitable assumes three kinds of numbers:
+<b>space</b>, <b>prec</b>. writeasciitable assumes three kinds of numbers
+for printing. The whole table data is saved as double.
 
-1. Integers (%d in printf).
-2. Scientfic (%g in printf).
+1. Integers (%.0f in printf).
+2. Scientfic (%lg in printf).
 3. Float (%f) for very accurate numbers.
 
 The default number format for writeasciitable is the second. If the 
