@@ -8,7 +8,9 @@ comma) and save the table and possible comments along with
 relevant information (number of rows and columns of the data 
 and number of comments) into a C structure. It is written fully 
 in C89. The input table must not contain any non-numeric 
-elements in this version of attaavv.
+elements in this version of attaavv. It is a very simple set of
+functions that most programs implement internally, but I couldn't
+find any function that only does this.
 
 attaavv is not a standalone program, it is made to be placed 
 inside a C program in order to read an ascii table and save the
