@@ -78,8 +78,10 @@ read from the ascii data in the data folder.
 ----------------------------------------
 Converting output to 2D:
 ----------------------------------------
-In case you want your output to be two dimensional, you can simply
-create a pointer to a pointer array on top of the output:
+In case you want to use your table as a two dimensional array, 
+you can simply create a pointer to a pointer array on top of 
+the output. As an example, in the ./examples/src/ui.c file 
+add these lines of code:
 
 In the declarations:
 
