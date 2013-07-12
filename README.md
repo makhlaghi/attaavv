@@ -87,25 +87,25 @@ first two of the above, its printf formatting string is like this:
 %-[minspace].[numdecimals]g (scientific notation). [minspace] and 
 [numdecimals] are set by the space[1], prec[0] inputs.
 
-int_cols:   This array tells the function which columns are integers.
+<ol>
+<li><b>int_cols:</b>This array tells the function which columns are integers.
             The last element has to be negative in order to signal
             the end. The minimum space parameter for the %-[minspace]d
-            is set by space[0].
-            
-accu_cols:  In some cases, we are dealing with a float that requires
+            is set by space[0].</li>
+<li><b>accu_cols:</b>In some cases, we are dealing with a float that requires
             very high accuracy compared to the other inputs, in this
             case you can specify which columns have this condition
             in this array. Like int_cols, the last element has to
             be -1. The formatting for these columns will be assumed 
             to be like this: %-[minspace].[numdecimals]f, [minspace]
-            is determined by space[2] and [numdecimals] by prec[1].
+            is determined by space[2] and [numdecimals] by prec[1].</li>
+<li><b>space:</b>  This array shows how much space should be allocated to 
+            each kind of column as explained above.</li>
             
-space:      This array shows how much space should be allocated to 
-            each kind of column as explained above.
-            
-prec:       This array shows the level of precision (significant 
+<li><b>prec:</b>This array shows the level of precision (significant 
             numbers for the general type and number of decimal points
-            for the extra precision columns) as explained above.
+            for the extra precision columns) as explained above.</li>
+</ol>
 
 ----------------------------------------
 Comments and suggestions:
