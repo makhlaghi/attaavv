@@ -7,13 +7,13 @@ attaavv - ascii table to array and vice versa in C!
 About this tool
 ----------------------------------------
 attaavv will read an ascii table of data (separated by space or 
-comma) and save the table and possible comments along with 
-relevant information (number of rows and columns of the data 
-and number of comments) into a C structure. It is written fully 
-in C89. The input table must not contain any non-numeric 
-elements in this version of attaavv. It is a very simple set of
-functions that most programs implement internally, but I couldn't
-find any function that only does this.
+comma) and save the table as a C array of doubles along with 
+possible comments and other relevant information into a C 
+structure. Components of the structure are explained bellow. 
+It is written fully in C89. The input table must not contain 
+any non-numeric elements in this version of attaavv. This is 
+a very simple program, only meant to do the most basic input 
+and output of tabular numerical data in a nicely formated way. 
 
 attaavv is not a standalone program, it is made to be placed 
 inside a C program in order to read an ascii table and save the
@@ -26,6 +26,19 @@ The output is a 1D array containing all the data which you can use
 by indexing the output with [i*n2+j] where n2 is the second
 axis size and i and j are the first and second axis indexes 
 respectively. To convert to a 2D array read bellow.
+
+----------------------------------------
+Output structure
+----------------------------------------
+The function fills in the ArrayInfo structure definition, declared
+in attaavv.h. The components include (in order): 
+
+1. Number of header (comment) lines.
+2. Array of pointers to comments.
+3. Number of rows (zeroth axis) in the data table.
+4. Number of columns (first axis) in the data table.
+5. Data array (1D).
+
 
 ----------------------------------------
 Running the example:
@@ -45,22 +58,22 @@ Converting output to 2D:
 In case you want your output to be two dimensional, you can simply
 create a pointer to a pointer array on top of the output:
 
-<-- In the declarations: -->
+In the declarations:
 
     int i;
     double **TwoDarray;
 
-<-- After calling readasciitable -->
+After calling readasciitable
 
     TwoDarray=malloc(intable.s0 * sizeof(double *));
     for (i = 0; i < intable.s0; i++)
         TwoDarray[i] = &intable.d[i*intable.s1];
 
-<-- To test it: -->
+To test it:
 
     printf("%f\n", TwoDarray[0][2]);
 
-<-- Free the space in the end -->
+Free the space in the end
 
     free(TwoDarray);
 
@@ -109,4 +122,4 @@ Mohammad Akhlaghi
 
 http://astr.tohoku.ac.jp/~akhlaghi/
 
-12 July 2013.
+12 July 2013
