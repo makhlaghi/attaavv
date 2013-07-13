@@ -256,9 +256,9 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     }
 
     /* Set the array and comment sizes to zero for later steps */
-    (*intable).s0=0;
-    (*intable).s1=0;
-    (*intable).nc=0;
+    intable->s0=0;
+    intable->s1=0;
+    intable->nc=0;
     
     /* Go over the input file line by line and read
     the comments and data into the given arrays. */
@@ -283,8 +283,7 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
 
         /* Incase the line is a comment line: */
         if(str[0]==COMMENT_SIGN) 
-            ForComments(&((*intable).c), &((*intable).nc), 
-                        &buff_num_comments, str);
+            ForComments(&intable->c, &intable->nc, &buff_num_comments, str);
 
         /* If a line doesn't begin with a COMMENT_SIGN, it is 
         read as data and put into an array of data values. */
@@ -292,20 +291,20 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
         {
             /* If this is the first data row, count how many 
             columns it has to make the correct input format */
-            if ((*intable).s1==0) 
-                 CountCols(str, &((*intable).s1), &((*intable).d), buff_num_rows);
+            if (intable->s1==0) 
+                 CountCols(str, &intable->s1, &intable->d, buff_num_rows);
 
             /* We now have an initial array to begin with,
             we will fill it up with the rows */
-            AddRow(&((*intable).d), &((*intable).s0), &((*intable).s1), 
+            AddRow(&intable->d, &intable->s0, &intable->s1, 
                    &buff_num_rows, str);
         }
     }
     /* Shrink the comments array to the correct size: */
-    if ((*intable).nc!=0)
+    if (intable->nc!=0)
     {
-        temp_c_pt = realloc((*intable).c, (*intable).nc*sizeof(char *));
-        if(temp_c_pt != NULL) (*intable).c=temp_c_pt;
+        temp_c_pt = realloc(intable->c, intable->nc*sizeof(char *));
+        if(temp_c_pt != NULL) intable->c=temp_c_pt;
         else 
         {
             printf("\n### Error: Comments array could not be reallocated.\n\n");
@@ -314,8 +313,8 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     }
 
     /* Shrink the data array to the correct size: */
-    temp_d_pt=realloc((*intable).d, ((*intable).s0)*((*intable).s1)*sizeof(double));
-    if(temp_d_pt != NULL) (*intable).d=temp_d_pt;
+    temp_d_pt=realloc(intable->d, intable->s0*intable->s1*sizeof(double));
+    if(temp_d_pt != NULL) intable->d=temp_d_pt;
     else 
         {
             printf("\n### Error: Data array could not be reallocated.\n\n");
