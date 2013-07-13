@@ -14,7 +14,7 @@ int main (void)
 {
     /* Definitions: */
     char input_name[]="./data/cat.txt", output_name[]="tempcat.txt";
-    int int_cols[]={0,4,-1}, accu_cols[]={1,2,-1};
+    int int_cols[]={0,2,-1}, accu_cols[]={4,-1};
     int space[]={5,10,15}, prec[]={6,8};
 
     /* Declare the structure that will keep the array: */

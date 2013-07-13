@@ -113,12 +113,69 @@ CountCols(char *str, int *s1, double **table,
 }
 
 /********************************************
+ *  This function will print a message      *
+ *  notifying the user that a replacement   *
+ *  has taken place because the specified   * 
+ *  element in the data was not a number    *
+ ********************************************/
+void replacenan(struct ArrayInfo *intable, int col, 
+                     long int *buff_num_replacements)
+{
+    int *temp_i_pt;
+ 
+    /* If this is the first replacement, open up space for the
+    array keeping the positions of the replacements: */
+    if (intable->nr==0)
+    {
+        intable->r=malloc(*buff_num_replacements*sizeof(int));
+        if (intable->r==NULL)
+        { 
+            printf("\n### ERROR: malloc failed to ");
+            printf("create a replacement table\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /* Do the replacement: */
+    intable->d[intable->s0*intable->s1+col]=(double) CHAR_REPLACEMENT;
+
+    /* Report it. If CHAR_REPLACEMENT is zero, abort the program: */
+    printf("### Not a number:\n");
+    printf("###        in (%d, %d)\n",intable->s0, col);
+    if (CHAR_REPLACEMENT==0) exit(EXIT_FAILURE);
+    printf("###        replaced with"); 
+    printf(" %f.\n", (double) CHAR_REPLACEMENT);
+    printf("###        (CHAR_REPLACEMENT macro)\n\n");
+
+    /* Save the position of the replaced element and 
+    increment the number of replacements */
+    intable->r[2*intable->nr]=intable->s0;
+    intable->r[2*intable->nr+1]=col;
+    intable->nr++;
+
+    /* Increase the size of the replacements array if necessary: */
+    if (2*intable->nr>=*buff_num_replacements)
+    {
+        *buff_num_replacements+=2*BUFFER_NUM;
+        temp_i_pt=realloc(intable->r, *buff_num_replacements*sizeof(int));
+        if(temp_i_pt!=NULL) intable->r=temp_i_pt;
+        else 
+        {
+            printf("\n### Error: Replacements array ");
+            printf("could not be reallocated.\n\n");
+            exit(EXIT_FAILURE);
+        }
+
+    }
+}
+
+/********************************************
  *  Knowing the number of columns, this     *
  *  function will read in each row          *
  ********************************************/
 void 
-AddRow(double **table, int *s0, int *s1,
-       long int *buff_num_rows, char *str)
+AddRow(struct ArrayInfo *intable, long int *buff_num_rows, 
+       long int *buff_num_replacements, char *str)
 {
     /* Declarations: */ 
     int num_cols=1, z_index;
@@ -127,39 +184,36 @@ AddRow(double **table, int *s0, int *s1,
     double *temp_d_pt;
 
     /* Set the index of the zeroth element in the row to be added:*/
-    z_index=(*s0)*(*s1);
+    z_index=intable->s0*intable->s1;
 
     /* Check if there is anything in this row: */
     if((strdata=strtok(str," \n,"))==NULL) return ;
 
     /* Read the first element of the row: */
-    (*table)[z_index]=strtod(strdata, ExtraString);
+    intable->d[z_index]=strtod(strdata, ExtraString);
     if (strlen(*ExtraString)>0)
-    {
-        printf("### Error: There are non-numerica data.\n");
-        printf("###        in data row number %d",*s0+1);
-        printf("(starting from 1).\n");
-        exit(EXIT_FAILURE);
-    }
+         replacenan(intable, 0, buff_num_replacements);
 
     /* Continue with the rest: */
     while (1)
     {
+        /* Incase it is the end of the line, break out: */
         if( (strdata=strtok(NULL," \n,"))==NULL ) break;
-        (*table)[z_index+num_cols++]=strtod(strdata, ExtraString);
+
+        /* put the element in the array, if it is not a number
+        inform the user and replace it with CHAR_REPLACEMENT*/
+        intable->d[z_index+num_cols++]=strtod(strdata, ExtraString);
         if (strlen(*ExtraString)>0)
-        {
-            printf("### Error: There are non-numerica data.\n");
-            printf("###        in data row number ");
-            printf("%d (starting from 1).\n",*s0+1);
-            exit(EXIT_FAILURE);
-        }        
-        if (num_cols>*s1)
+            replacenan(intable, num_cols-1, buff_num_replacements);
+     
+        /* Incase the number of columns has exceeded the desired value
+        abort the program and inform the user. */
+        if (num_cols>intable->s1)
         {
             printf("### Error: Too many data in row");
-            printf("%d (starting from 1).\n",*s0+1);
+            printf("%d (starting from 1).\n",intable->s0+1);
             printf("### --------------should have");
-            printf("%d but has %d.\n", *s1, num_cols);
+            printf("%d but has %d.\n", intable->s1, num_cols);
             exit(EXIT_FAILURE);
         }        
     }
@@ -167,25 +221,26 @@ AddRow(double **table, int *s0, int *s1,
     /* Check if the number of rows was not smaller than 
     what was expected. In a normal file the last line 
     will have 1 from the initialization.*/
-    if (num_cols<*s1 && num_cols>1)
+    if (num_cols<intable->s1 && num_cols>1)
     {
         printf("### Error: Too few data in data row");
-        printf("%d (starting from 1).\n",*s0+1);
+        printf("%d (starting from 1).\n",intable->s0+1);
         printf("### --------------should have");
-        printf("%d but has %d.\n", *s1, num_cols);
+        printf("%d but has %d.\n", intable->s1, num_cols);
         exit(EXIT_FAILURE);
     }        
     
-    /* Add to the number of saved rows: */
-    if (num_cols==*s1) (*s0)++;
+    /* Add to the number of saved rows. The condition is here
+    because I don't want to count the last (empty) row. */
+    if (num_cols==intable->s1) intable->s0++;
 
     /* Check to see if the buffer size has not been exceeded.
     If it has, add space to the table array for the next rows. */
-    if (*s0>=*buff_num_rows)
+    if (intable->s0>=*buff_num_rows)
     {
         *buff_num_rows+=BUFFER_NUM;
-        temp_d_pt=realloc(*table, *buff_num_rows*(*s1)*sizeof(double));
-        if(temp_d_pt!=NULL) *table=temp_d_pt;
+        temp_d_pt=realloc(intable->d, *buff_num_rows*intable->s1*sizeof(double));
+        if(temp_d_pt!=NULL) intable->d=temp_d_pt;
         else 
         {
             printf("\n### Error: Data array could not be reallocated.\n\n");
@@ -244,6 +299,7 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     long int line_counter=0;
     long int buff_num_rows=BUFFER_NUM;
     long int buff_num_comments=BUFFER_NUM;
+    long int buff_num_replacements=2*BUFFER_NUM; /* Has to be even */
     char str[MAX_ROW_CHARS], **temp_c_pt;
     double *temp_d_pt;
     FILE *fp=fopen(filename, "r");
@@ -255,10 +311,12 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
         exit(EXIT_FAILURE);
     }
 
-    /* Set the array and comment sizes to zero for later steps */
+    /* Initialize all the sizes in the structure 
+    to zero for later steps */
     intable->s0=0;
     intable->s1=0;
     intable->nc=0;
+    intable->nr=0;
     
     /* Go over the input file line by line and read
     the comments and data into the given arrays. */
@@ -296,8 +354,7 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
 
             /* We now have an initial array to begin with,
             we will fill it up with the rows */
-            AddRow(&intable->d, &intable->s0, &intable->s1, 
-                   &buff_num_rows, str);
+            AddRow(intable, &buff_num_rows, &buff_num_replacements, str);
         }
     }
     /* Shrink the comments array to the correct size: */
@@ -323,6 +380,14 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
 
     /* Close the file and return 0 (meaning success)  */
     fclose(fp);
+
+    /* Report the result: */
+    printf("\n\n----------------------\n");
+    printf("Completed reading %s\n", filename);
+    printf("   Number of comment lines: %d.\n", intable->nc);
+    printf("   Shape of table: (%d, %d).\n", intable->s0, intable->s1);
+    printf("   Number of replaced elements: %ld.\n", intable->nr);
+    printf("----------------------\n\n");
 }
 
 /****************************************************
