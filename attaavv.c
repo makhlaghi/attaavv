@@ -118,8 +118,9 @@ CountCols(char *str, int *s1, double **table,
  *  has taken place because the specified   * 
  *  element in the data was not a number    *
  ********************************************/
-void replacenan(struct ArrayInfo *intable, int col, 
-                     long int *buff_num_replacements)
+void 
+replacenan(struct ArrayInfo *intable, int col, char *strdata, 
+           long int *buff_num_replacements)
 {
     int *temp_i_pt;
  
@@ -141,7 +142,7 @@ void replacenan(struct ArrayInfo *intable, int col,
 
     /* Report it. If CHAR_REPLACEMENT is zero, abort the program: */
     printf("### Not a number:\n");
-    printf("###        in (%d, %d)\n",intable->s0, col);
+    printf("###        \"%s\" in (%d, %d)\n", strdata, intable->s0, col);
     if (CHAR_REPLACEMENT==0) exit(EXIT_FAILURE);
     printf("###        replaced with"); 
     printf(" %f.\n", (double) CHAR_REPLACEMENT);
@@ -192,7 +193,7 @@ AddRow(struct ArrayInfo *intable, long int *buff_num_rows,
     /* Read the first element of the row: */
     intable->d[z_index]=strtod(strdata, ExtraString);
     if (strlen(*ExtraString)>0)
-         replacenan(intable, 0, buff_num_replacements);
+         replacenan(intable, 0, strdata, buff_num_replacements);
 
     /* Continue with the rest: */
     while (1)
@@ -204,7 +205,7 @@ AddRow(struct ArrayInfo *intable, long int *buff_num_rows,
         inform the user and replace it with CHAR_REPLACEMENT*/
         intable->d[z_index+num_cols++]=strtod(strdata, ExtraString);
         if (strlen(*ExtraString)>0)
-            replacenan(intable, num_cols-1, buff_num_replacements);
+            replacenan(intable, num_cols-1, strdata, buff_num_replacements);
      
         /* Incase the number of columns has exceeded the desired value
         abort the program and inform the user. */
@@ -247,6 +248,52 @@ AddRow(struct ArrayInfo *intable, long int *buff_num_rows,
             exit(EXIT_FAILURE);
         }
     }
+}
+
+/********************************************
+ * All of the arrays have some extra space  *
+ * correct this so all of them finish on    *
+ * their last valuable element              *
+ ********************************************/
+void
+correctsizes(struct ArrayInfo *intable)
+{
+    /* Shrink the comments array to the correct size: */
+    if (intable->nc!=0)
+    {
+        intable->c = realloc(intable->c, intable->nc*sizeof(char *));
+        if(intable->c == NULL)
+        {
+            printf("\n### Error: Comments array could ");
+            printf("not be reallocated.\n\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /* Shrink the data array to the correct size: */
+    if (intable->nc!=0)
+    {
+        intable->d=realloc(intable->d, intable->s0*intable->s1*sizeof(double));
+        if(intable->d == NULL)
+        {
+            printf("\n### Error: Data array could ");
+            printf("not be reallocated.\n\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /* Shrink the replacements array: */
+    if (intable->nr!=0)
+    {
+        intable->r=realloc(intable->r, 2*intable->nr*sizeof(int));
+        if(intable->r == NULL)
+        {
+            printf("\n### Error: Replacements array could ");
+            printf("not be reallocated.\n\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
 }
 
 /****************************************************
@@ -300,8 +347,7 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     long int buff_num_rows=BUFFER_NUM;
     long int buff_num_comments=BUFFER_NUM;
     long int buff_num_replacements=2*BUFFER_NUM; /* Has to be even */
-    char str[MAX_ROW_CHARS], **temp_c_pt;
-    double *temp_d_pt;
+    char str[MAX_ROW_CHARS];
     FILE *fp=fopen(filename, "r");
 
     /* Check if the file opening was successful: */
@@ -357,26 +403,9 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
             AddRow(intable, &buff_num_rows, &buff_num_replacements, str);
         }
     }
-    /* Shrink the comments array to the correct size: */
-    if (intable->nc!=0)
-    {
-        temp_c_pt = realloc(intable->c, intable->nc*sizeof(char *));
-        if(temp_c_pt != NULL) intable->c=temp_c_pt;
-        else 
-        {
-            printf("\n### Error: Comments array could not be reallocated.\n\n");
-            exit(EXIT_FAILURE);
-        }
-    }
 
-    /* Shrink the data array to the correct size: */
-    temp_d_pt=realloc(intable->d, intable->s0*intable->s1*sizeof(double));
-    if(temp_d_pt != NULL) intable->d=temp_d_pt;
-    else 
-        {
-            printf("\n### Error: Data array could not be reallocated.\n\n");
-            exit(EXIT_FAILURE);
-        }
+    /* Correct the sizes of the arrays: */
+    correctsizes(intable);
 
     /* Close the file and return 0 (meaning success)  */
     fclose(fp);

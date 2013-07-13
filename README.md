@@ -14,7 +14,7 @@ It is written fully in C89. If the input table contains
 any non-numeric elements, the program will either abort and notify
 the user or change the value to a defined value. This is 
 a very simple program, only meant to do the most basic input 
-and output of tabular numerical data in a nicely formated way. 
+and output of tabular numerical data in a nicely formatted way. 
 
 attaavv is not a standalone program, it is made to be placed 
 inside a C program in order to read an ascii table and save the
@@ -82,7 +82,11 @@ non-numeric element with the value in that macro.
 The number of replaced elements in the table is reported in 
 the "nr" member (an integer) of the output structure and the 
 positions of those replaced elements is stored in the "r" member 
-(1D array or length 2*nr) of the output structure.
+(1D array or length 2*nr) of the output structure. Each pair of
+elements in the "r" array shows the positions of each replaced
+member in order of (zeroth axis and first axis), therefore this
+1D array has 2*nr length. Again you can look at it like a 2D 
+array as shown below.
 
 
 ----------------------------------------
@@ -92,7 +96,7 @@ In order to test run the example, put the two .h and .c files in the
 src directory and run ($ is the shell prompt on the command line):
 
     $ make
-    $ ./ui
+    $ ./attaavv_ui
 
 A text file called tempcat.txt should be made showing the data it 
 read from the ascii data in the data folder.
