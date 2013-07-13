@@ -421,8 +421,8 @@ writeasciitable (const char *filename, struct ArrayInfo *intable,
     /* Make an array of strings to hold the 
     formattings for each row. */
     int i,j;
-    char **fmt=malloc((*intable).s1*sizeof(char *));
-    char *fmt_all=malloc(10*(*intable).s1*sizeof(char));
+    char **fmt=malloc(intable->s1*sizeof(char *));
+    char *fmt_all=malloc(10*intable->s1*sizeof(char));
     
     /* Open the output file: */
     FILE *fp=fopen(filename, "w");
@@ -435,18 +435,18 @@ writeasciitable (const char *filename, struct ArrayInfo *intable,
     }
     
     /* Prepare the formatting for each column */
-    DoFormatting((*intable).s1, fmt, fmt_all, int_cols, 
+    DoFormatting(intable->s1, fmt, fmt_all, int_cols, 
             accu_cols, space, prec);
 
     /* Print the headers to file: */
-    for(i=0;i<(*intable).nc;i++)    
-        fprintf(fp, "%s", (*intable).c[i]);
+    for(i=0;i<intable->nc;i++)    
+        fprintf(fp, "%s", intable->c[i]);
 
     /* Print the data to file: */
-    for(i=0;i<(*intable).s0;i++)
+    for(i=0;i<intable->s0;i++)
     {
-        for(j=0;j<(*intable).s1;j++) 
-            fprintf(fp, fmt[j], (*intable).d[i*(*intable).s1+j]);
+        for(j=0;j<intable->s1;j++) 
+            fprintf(fp, fmt[j], intable->d[i*intable->s1+j]);
         fprintf(fp, "\n");
     }
 
