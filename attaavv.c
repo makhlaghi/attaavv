@@ -3,9 +3,8 @@
 attaavv - ascii table to array and vice versa.
 Library to read ascii tables of any size into 1D C arrays.
 
-
-
 Copyright (C) 2013 Mohammad Akhlaghi
+Tohoku University Astronomical Institute, Sendai, Japan.
 http://astr.tohoku.ac.jp/~akhlaghi/
 
 This program is free software: you can redistribute it and/or modify
@@ -44,14 +43,43 @@ strdup (const char *s)
  *  comments array of pointers.             *
  ********************************************/
 void 
-ForComments(char ***comments, int *num_comments, char *str)
+ForComments(char ***comments, int *num_comments,
+            long int *buff_num_comments, char *str)
 {
+    char **temp_c_pt;
+
+    /* If the number of comments is zero, then no space 
+    has been allocated for the comments. Allocate some space: */
+    if (*num_comments==0)
+    {
+        *comments=malloc(*buff_num_comments*sizeof(char *)); 
+        if (*comments==NULL)
+        { 
+            printf("\n### ERROR: malloc failed to");
+            printf("create the comments in \"ForComments\".\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /* Copy the comment line into the comments array 
+    and add to the number of comments.*/
     (*comments)[*num_comments] = strdup(str);
     (*num_comments)++;
-    if (*num_comments>=MAX_NUM_COMMENTS) 
+
+    /* If it is getting longer than the actual length, 
+    make the comments array longer: */
+    if (*num_comments>=*buff_num_comments) 
     {
-        printf("\n### Error: Increase MAX_NUM_COMMENTS\n\n");
-        exit(EXIT_FAILURE);
+        *buff_num_comments+=BUFFER_NUM;
+        temp_c_pt = realloc(*comments, *buff_num_comments*sizeof(char *));
+        if(temp_c_pt != NULL) *comments=temp_c_pt;
+        else 
+        {
+            printf("\n### Error: Comments array could");
+            printf("not be reallocated in \"ForComments\".\n\n");
+            exit(EXIT_FAILURE);
+        }
+
     }
 }
 
@@ -89,12 +117,14 @@ CountCols(char *str, int *s1, double **table,
  *  function will read in each row          *
  ********************************************/
 void 
-AddRow(double **table, int *s0, int *s1, char *str)
+AddRow(double **table, int *s0, int *s1,
+       long int *buff_num_rows, char *str)
 {
-    /* Definitions: */ 
+    /* Declarations: */ 
     int num_cols=1, z_index;
     char *strdata, *tempstr="";
     char **ExtraString=&tempstr;
+    double *temp_d_pt;
 
     /* Set the index of the zeroth element in the row to be added:*/
     z_index=(*s0)*(*s1);
@@ -134,9 +164,9 @@ AddRow(double **table, int *s0, int *s1, char *str)
         }        
     }
 
-    /* Check if the number of rows was not 
-    smaller than what was expected. In a normal file
-    the last line will have 1 from the initialization.*/
+    /* Check if the number of rows was not smaller than 
+    what was expected. In a normal file the last line 
+    will have 1 from the initialization.*/
     if (num_cols<*s1 && num_cols>1)
     {
         printf("### Error: Too few data in data row");
@@ -146,8 +176,22 @@ AddRow(double **table, int *s0, int *s1, char *str)
         exit(EXIT_FAILURE);
     }        
     
-    /* Go onto the next row: */
+    /* Add to the number of saved rows: */
     if (num_cols==*s1) (*s0)++;
+
+    /* Check to see if the buffer size has not been exceeded.
+    If it has, add space to the table array for the next rows. */
+    if (*s0>=*buff_num_rows)
+    {
+        *buff_num_rows+=BUFFER_NUM;
+        temp_d_pt=realloc(*table, *buff_num_rows*(*s1)*sizeof(double));
+        if(temp_d_pt!=NULL) *table=temp_d_pt;
+        else 
+        {
+            printf("\n### Error: Data array could not be reallocated.\n\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 /****************************************************
@@ -163,8 +207,7 @@ AddRow(double **table, int *s0, int *s1, char *str)
  * <--          For the preprocessor             -->*
  * <----------------------------------------------->*  
  * #define MAX_ROW_CHARS 100000                     *
- * #define BUFFER_NUM_ROWS 1000                     *
- * #define MAX_NUM_COMMENTS  100                    *
+ * #define BUFFER_NUM 1000                          *
  * #define COMMENT_SIGN  '#'                        *
  * <----------------------------------------------->*   
  * <-- In the function you want to read an array -->*
@@ -182,8 +225,8 @@ AddRow(double **table, int *s0, int *s1, char *str)
  * <--    In case you want to see the results:   -->*
  * <----------------------------------------------->*   
  * int i,j;
- * for(i=0;i<intable.nh;i++) 
- *     printf("%s", intable.h[i]);
+ * for(i=0;i<intable.nc;i++) 
+ *     printf("%s", intable.c[i]);
  * for(i=0;i<intable.s0;i++)
  * {
  *     for (j=0;j<intable.s1;j++) 
@@ -191,14 +234,16 @@ AddRow(double **table, int *s0, int *s1, char *str)
  *     printf("\n");
  * }
  * printf("Table shape is: %d, %d\n", intable.s0, intable.s1);
- * printf("Number of comments: %d\n", intable.nh);
- * free(intable.d); free(intable.h);
+ * printf("Number of comments: %d\n", intable.nc);
+ * free(intable.d); free(intable.c);
  ***************************************************/
 void 
 readasciitable (const char *filename, struct ArrayInfo *intable)
 {
     /* Declarations: */
-    long int buff_num_rows=BUFFER_NUM_ROWS;
+    long int line_counter=0;
+    long int buff_num_rows=BUFFER_NUM;
+    long int buff_num_comments=BUFFER_NUM;
     char str[MAX_ROW_CHARS], **temp_c_pt;
     double *temp_d_pt;
     FILE *fp=fopen(filename, "r");
@@ -213,16 +258,7 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     /* Set the array and comment sizes to zero for later steps */
     (*intable).s0=0;
     (*intable).s1=0;
-    (*intable).nh=0;
-
-    /* Make an array for the comments and check it to see 
-    if the space was successfully made or not. */
-    (*intable).h = malloc(MAX_NUM_COMMENTS*sizeof(char *));
-    if ((*intable).h==NULL)
-    {
-        printf("\n### ERROR: malloc failed to create comments\n");
-        exit(EXIT_FAILURE);
-    }
+    (*intable).nc=0;
     
     /* Go over the input file line by line and read
     the comments and data into the given arrays. */
@@ -230,10 +266,26 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     {
         /* Read line by line: */
         fgets(str, sizeof(str), fp);
+        line_counter++;
+
+        /* Incase the length of the string is comparable
+        to the macro defining the string length, abort the
+        program and notify the user. 10 is just an arbitrary
+        number, if one row is so close, others might exceed.
+        it is not worth the risk to continue. */
+        if ((long int) strlen(str)>MAX_ROW_CHARS-10)
+        {
+            printf("### Error: The number of characters in\n");
+            printf("    line %ld are very near the buffer\n", line_counter); 
+            printf("    limit set by MAX_ROW_CHARS, make it larger.\n\n");
+            exit(EXIT_FAILURE);
+        }
 
         /* Incase the line is a comment line: */
-        if(str[0]==HEADER_SIGN) 
-            ForComments(&((*intable).h), &((*intable).nh), str);
+        if(str[0]==COMMENT_SIGN) 
+            ForComments(&((*intable).c), &((*intable).nc), 
+                        &buff_num_comments, str);
+
         /* If a line doesn't begin with a COMMENT_SIGN, it is 
         read as data and put into an array of data values. */
         else
@@ -245,28 +297,15 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
 
             /* We now have an initial array to begin with,
             we will fill it up with the rows */
-            AddRow(&((*intable).d), &((*intable).s0), &((*intable).s1), str);
-        }
-
-        /* Check to see if the buffer size has not been exceeded.
-        If it has, add space to the table array. */
-        if ((*intable).s0>=buff_num_rows)
-        {
-            buff_num_rows+=BUFFER_NUM_ROWS;
-            temp_d_pt=realloc((*intable).d, buff_num_rows*((*intable).s1)*sizeof(double));
-            if(temp_d_pt != NULL) (*intable).d=temp_d_pt;
-            else 
-            {
-                printf("\n### Error: Data array could not be reallocated.\n\n");
-                exit(EXIT_FAILURE);
-            }
+            AddRow(&((*intable).d), &((*intable).s0), &((*intable).s1), 
+                   &buff_num_rows, str);
         }
     }
     /* Shrink the comments array to the correct size: */
-    if ((*intable).nh!=0)
+    if ((*intable).nc!=0)
     {
-        temp_c_pt = realloc((*intable).h, (*intable).nh*sizeof(char *));
-        if(temp_c_pt != NULL) (*intable).h=temp_c_pt;
+        temp_c_pt = realloc((*intable).c, (*intable).nc*sizeof(char *));
+        if(temp_c_pt != NULL) (*intable).c=temp_c_pt;
         else 
         {
             printf("\n### Error: Comments array could not be reallocated.\n\n");
@@ -401,8 +440,8 @@ writeasciitable (const char *filename, struct ArrayInfo *intable,
             accu_cols, space, prec);
 
     /* Print the headers to file: */
-    for(i=0;i<(*intable).nh;i++)    
-        fprintf(fp, "%s", (*intable).h[i]);
+    for(i=0;i<(*intable).nc;i++)    
+        fprintf(fp, "%s", (*intable).c[i]);
 
     /* Print the data to file: */
     for(i=0;i<(*intable).s0;i++)

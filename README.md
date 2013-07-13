@@ -48,9 +48,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Output structure
 ----------------------------------------
 The function fills in the ArrayInfo structure definition, declared
-in attaavv.h. The components include (in order): 
+in attaavv.h. Comments specified by the COMMENT_SIGN macro. 
+The components include (in order): 
 
-1. Number of header (comment) lines.
+1. Number of comment lines .
 2. Array of pointers to comments.
 3. Number of rows (zeroth axis) in the data table.
 4. Number of columns (first axis) in the data table.
@@ -105,9 +106,9 @@ Free the space in the end
 ----------------------------------------
 Formatting input parameters to writeasciitable
 ----------------------------------------
-writeasciitable receives four input arrays, besides the table structure
-and the output name, they are: <b>int_cols</b>, <b>accu_cols</b>, 
-<b>space</b>, <b>prec</b>. writeasciitable assumes three kinds of numbers
+writeasciitable receives four input arrays, besides the table 
+structure and the output name, they are: "int_cols", "accu_cols", 
+"space", "prec". writeasciitable assumes three kinds of numbers
 for printing. The whole table data is saved as double.
 
 1. Integers (%.0f in printf).
@@ -121,26 +122,26 @@ default representation is: %-[minspace].[numsigchar]g (scientific
 notation). [minspace] and [numsigchar] are set by the space[1], 
 prec[0] inputs.
 
-<ol>
-<li><b>int_cols:</b>This array tells the function which columns are 
+<dl>
+<dt>int_cols:</dt><dd>This array tells the function which columns are 
             integers. The last element has to be negative in order 
             to signal the end of this array. The minimum space 
             parameter, used in printf, for the specified columns is 
-            %-[minspace].0f. [minspace] is set by space[0].</li>
-<li><b>accu_cols:</b>In some cases, we are dealing with a float that 
+            %-[minspace].0f. [minspace] is set by space[0].</dd>
+<dt>accu_cols:</dt><dd>In some cases, we are dealing with a float that 
             requires very high accuracy compared to the other inputs 
             (last column in the example data). In such cases you can 
             specify which columns have this condition in this array. 
             Like int_cols, the last element has to be -1. The 
             formatting for these columns will be assumed to be like 
             this: %-[minspace].[numdecimals]f, [minspace]
-            is determined by space[2] and [numdecimals] by prec[1].</li>
-<li><b>space:</b>This array shows how much space should be allocated to 
-            each kind of column as explained above.</li>
-<li><b>prec:</b>This array shows the level of precision (significant 
+            is determined by space[2] and [numdecimals] by prec[1].</dd>
+<dt>space:</dt><dd>This array shows how much space should be allocated to 
+            each kind of column as explained above.</dd>
+<li>prec:</dt><dd>This array shows the level of precision (significant 
             numbers for the general type and number of decimal points
-            for the extra precision columns) as explained above.</li>
-</ol>
+            for the extra precision columns) as explained above.</dd>
+</dl>
 
 ----------------------------------------
 Comments and suggestions:

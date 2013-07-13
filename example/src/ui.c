@@ -1,9 +1,11 @@
 /*********************************************
-   This is a demonstration file to show the 
-   applicability of the read and right
-   functions.
-
-   Mohammad Akhlaghi, July 2013
+ *********************************************
+ *********************************************
+ **          Mohammad Akhalaghi             **
+ **   http://astr.tohoku.ac.jp/~akhlaghi/   **
+ **              July 2013                  **
+ *********************************************
+ *********************************************
  *********************************************/
 
 #include "attaavv.h"
@@ -12,8 +14,8 @@ int main (void)
 {
     /* Definitions: */
     char input_name[]="./data/cat.txt", output_name[]="tempcat.txt";
-    int int_cols[]={0,2,-1}, accu_cols[]={4,-1};
-    int space[]={5,10,15}, prec[]={5,8};
+    int int_cols[]={0,4,-1}, accu_cols[]={1,2,-1};
+    int space[]={5,10,15}, prec[]={6,8};
 
     /* Declare the structure that will keep the array: */
     struct ArrayInfo intable;
@@ -30,7 +32,7 @@ int main (void)
     writeasciitable(&output_name[0], &intable, int_cols, accu_cols, space, prec);
 
     /* Free up the comments and table arrays: */
-    free(intable.d); free(intable.h);
+    free(intable.d); free(intable.c);
     return 0;
 }
 
