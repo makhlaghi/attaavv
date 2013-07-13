@@ -10,8 +10,9 @@ attaavv will read an ascii table of data (separated by space or
 comma) and save the table as a C array of doubles along with 
 possible comments and other relevant information into a C 
 structure. Components of the structure are explained bellow. 
-It is written fully in C89. The input table must not contain 
-any non-numeric elements in this version of attaavv. This is 
+It is written fully in C89. If the input table contains
+any non-numeric elements, the program will either abort and notify
+the user or change the value to a defined value. This is 
 a very simple program, only meant to do the most basic input 
 and output of tabular numerical data in a nicely formated way. 
 
@@ -49,19 +50,39 @@ Output structure
 ----------------------------------------
 The function fills in the ArrayInfo structure definition, declared
 in attaavv.h. Comments specified by the COMMENT_SIGN macro. 
-The components include (in order): 
+The components include (in order, member name is shown after ordered
+number): 
 
-1. Number of comment lines .
-2. Array of pointers to comments.
-3. Number of rows (zeroth axis) in the data table.
-4. Number of columns (first axis) in the data table.
-5. Data array (1D).
+1. nc: Number of comment lines.
+2.  c: Array of pointers to comments.
+3. s0: Number of rows (zeroth axis) in the data table.
+4. s1: Number of columns (first axis) in the data table.
+5.  d: Data array (1D).
+6. nr: Number of replaced elements.
+7.  r: Array showing the positions of the replaced elements.
 
 The 5th element of the output structure (the data in the table) 
 is a 1D array containing all the data which you can use
 by indexing the output with [i*n2+j] where n2 is the second
 axis size and i and j are the first and second axis indexes 
 respectively. To convert to a 2D array read bellow. 
+
+----------------------------------------
+Non-numeric elements in the table:
+----------------------------------------
+The output of this program has to be a double (C type) array. 
+Therefore if the table has character elements or some elements 
+that cannot be read, the user should define what the program should 
+do. For this job the CHAR_REPLACEMENT macro is defined in 
+attaavv.h. If the value of this macro is 0, the program will 
+report the position of the first non-numeric element and abort. 
+If it has any non-zero value, the program will replace any 
+non-numeric element with the value in that macro.
+
+The number of replaced elements in the table is reported in 
+the "nr" member (an integer) of the output structure and the 
+positions of those replaced elements is stored in the "r" member 
+(1D array or length 2*nr) of the output structure.
 
 
 ----------------------------------------
