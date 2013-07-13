@@ -138,7 +138,7 @@ prec[0] inputs.
             is determined by space[2] and [numdecimals] by prec[1].</dd>
 <dt>space:</dt><dd>This array shows how much space should be allocated to 
             each kind of column as explained above.</dd>
-<li>prec:</dt><dd>This array shows the level of precision (significant 
+<dt>prec:</dt><dd>This array shows the level of precision (significant 
             numbers for the general type and number of decimal points
             for the extra precision columns) as explained above.</dd>
 </dl>
@@ -158,4 +158,4 @@ Mohammad Akhlaghi
 
 http://astr.tohoku.ac.jp/~akhlaghi/
 
-12 July 2013
+13 July 2013
