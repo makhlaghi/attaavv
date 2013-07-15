@@ -25,10 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 /* Make the macro definitions:
    MAX_ROW_CHARS specifies the maximum number of
       characters in a row in the ascii data file.
