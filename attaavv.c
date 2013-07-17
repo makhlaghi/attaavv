@@ -27,13 +27,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include "attaavv.h"
 
+char *
+strdup (const char *s) 
 /********************************************
  * This is here because for some strange    *
  * reason, strdup doesn't work in           *
  * ForComments                              *
  ********************************************/
-char *
-strdup (const char *s) 
 {
     char *d = malloc (strlen (s) + 1);
     if (d != NULL)
@@ -41,13 +41,13 @@ strdup (const char *s)
     return d;
 }
 
+void 
+ForComments(char ***comments, int *num_comments,
+            long int *buff_num_comments, char *str)
 /********************************************
  *  Get the comments string, add it to the  *
  *  comments array of pointers.             *
  ********************************************/
-void 
-ForComments(char ***comments, int *num_comments,
-            long int *buff_num_comments, char *str)
 {
     char **temp_c_pt;
 
@@ -86,13 +86,13 @@ ForComments(char ***comments, int *num_comments,
     }
 }
 
+void 
+CountCols(char *str, int *s1, double **table, 
+         long int buff_num_rows)
 /********************************************
  *  Get the first data string and see how   *
  *  many columns of data there are in it.   * 
  ********************************************/
-void 
-CountCols(char *str, int *s1, double **table, 
-         long int buff_num_rows)
 {
     /* The original string is copied, because strtok
     will be used on it again in a later function. */
@@ -115,15 +115,15 @@ CountCols(char *str, int *s1, double **table,
     }
 }
 
+void 
+replacenan(struct ArrayInfo *intable, int col, char *strdata, 
+           long int *buff_num_replacements)
 /********************************************
  *  This function will print a message      *
  *  notifying the user that a replacement   *
  *  has taken place because the specified   * 
  *  element in the data was not a number    *
  ********************************************/
-void 
-replacenan(struct ArrayInfo *intable, int col, char *strdata, 
-           long int *buff_num_replacements)
 {
     int *temp_i_pt;
  
@@ -173,13 +173,13 @@ replacenan(struct ArrayInfo *intable, int col, char *strdata,
     }
 }
 
+void 
+AddRow(struct ArrayInfo *intable, long int *buff_num_rows, 
+       long int *buff_num_replacements, char *str)
 /********************************************
  *  Knowing the number of columns, this     *
  *  function will read in each row          *
  ********************************************/
-void 
-AddRow(struct ArrayInfo *intable, long int *buff_num_rows, 
-       long int *buff_num_replacements, char *str)
 {
     /* Declarations: */ 
     int num_cols=1, z_index;
@@ -299,6 +299,9 @@ correctsizes(struct ArrayInfo *intable)
 
 }
 
+
+void 
+readasciitable (const char *filename, struct ArrayInfo *intable)
 /****************************************************
  *  Read an ascii table into an array and also      *
  *  give the number of rows and columns in the      *
@@ -342,8 +345,6 @@ correctsizes(struct ArrayInfo *intable)
  * printf("Number of comments: %d\n", intable.nc);
  * free(intable.d); free(intable.c);
  ***************************************************/
-void 
-readasciitable (const char *filename, struct ArrayInfo *intable)
 {
     /* Declarations: */
     long int line_counter=0;
@@ -422,15 +423,15 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     printf("----------------------\n\n");
 }
 
+void 
+DoFormatting(int numcols, char **fmt, char *fmt_all, int *int_cols, 
+             int *accu_cols, int *space, int *prec)
 /****************************************************
  ** This function gets the formatting settings     **
  ** of the array as required by writeasciitable    **
  ** and makes an array of formatting conditions    **
  ** that is suitable for printing.                 **
  ****************************************************/
-void 
-DoFormatting(int numcols, char **fmt, char *fmt_all, int *int_cols, 
-             int *accu_cols, int *space, int *prec)
 {
     int i,j, found=0;
     char intstr[10], eacustr[10], otherstr[10];
@@ -475,6 +476,9 @@ DoFormatting(int numcols, char **fmt, char *fmt_all, int *int_cols,
     }
 }
 
+void 
+writeasciitable (const char *filename, struct ArrayInfo *intable, 
+                 int *int_cols, int *accu_cols, int *space, int *prec)
 /********************************************
  *  Write an array to an ascii file         * 
  *  The example bellow assumes your array   *
@@ -510,9 +514,6 @@ writeasciitable(&output_name[0], &intable,
         int_cols, accu_cols, space, prec);
 
 ********************************************/
-void 
-writeasciitable (const char *filename, struct ArrayInfo *intable, 
-                 int *int_cols, int *accu_cols, int *space, int *prec)
 {
 
     /* Make an array of strings to hold the 
@@ -550,4 +551,17 @@ writeasciitable (const char *filename, struct ArrayInfo *intable,
     /* Close the file and free all pointers: */
     free(fmt_all);free(fmt);
     fclose(fp);    
+}
+
+
+void 
+freeasciitable (struct ArrayInfo *intable)
+/********************************************
+ ** Free the space that was created by     **
+ ** during readasciitable                  **
+ ********************************************/
+{
+    int i;
+    for(i=0;i<intable->nc;i++) free(intable->c[i]);
+    free(intable->d); free(intable->c);
 }

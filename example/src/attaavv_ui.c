@@ -14,7 +14,6 @@
 int main (void)
 {
     /* Definitions: */
-    int i;
     char input_name[]="./data/cat.txt";
     char output_name[]="tempcat.txt";
     int int_cols[]={0,2,-1}, accu_cols[]={4,-1};
@@ -29,9 +28,9 @@ int main (void)
     /* Print the table to a file */
     writeasciitable(output_name, &intable, int_cols, accu_cols, space, prec);
 
-    /* Free up the comments and table arrays: */
-    for(i=0;i<intable.nc;i++) free(intable.c[i]);
-    free(intable.d); free(intable.c);
+    /* Free the space allocated to the 
+    comments and table arrays: */
+    freeasciitable(&intable);
     return 0;
 }
 

@@ -68,5 +68,6 @@ struct ArrayInfo
 void readasciitable (const char *, struct ArrayInfo *);
 void writeasciitable (const char *, struct ArrayInfo *, 
                       int *, int *, int *, int *);
+void freeasciitable (struct ArrayInfo *);
 
 #endif
