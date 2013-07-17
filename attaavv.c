@@ -7,12 +7,12 @@ Copyright (C) 2013 Mohammad Akhlaghi
 Tohoku University Astronomical Institute, Sendai, Japan.
 http://astr.tohoku.ac.jp/~akhlaghi/
 
-This program is free software: you can redistribute it and/or modify
+attaavv is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+attaavv is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -253,13 +253,13 @@ AddRow(struct ArrayInfo *intable, long int *buff_num_rows,
     }
 }
 
+void
+correctsizes(struct ArrayInfo *intable)
 /********************************************
  * All of the arrays have some extra space  *
  * correct this so all of them finish on    *
  * their last valuable element              *
  ********************************************/
-void
-correctsizes(struct ArrayInfo *intable)
 {
     /* Shrink the comments array to the correct size: */
     if (intable->nc!=0)
