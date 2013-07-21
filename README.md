@@ -50,8 +50,7 @@ Output structure
 ----------------------------------------
 The function fills in the ArrayInfo structure definition, declared
 in attaavv.h. Comments specified by the COMMENT_SIGN macro. 
-The components include (in order, member name is shown after ordered
-number): 
+The components of the structure are:
 
 ----  c: Comments string.
 
