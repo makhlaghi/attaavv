@@ -27,68 +27,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include "attaavv.h"
 
-char *
-strdup (const char *s) 
-/********************************************
- * This is here because for some strange    *
- * reason, strdup doesn't work in           *
- * ForComments                              *
- ********************************************/
-{
-    char *d = malloc (strlen (s) + 1);
-    if (d != NULL)
-        strcpy (d,s);
-    return d;
-}
-
 void 
-ForComments(char ***comments, int *num_comments,
-            long int *buff_num_comments, char *str)
+ForComments(char *comments, long int *buff_comments, char *str)
 /********************************************
  *  Get the comments string, add it to the  *
  *  comments array of pointers.             *
  ********************************************/
 {
-    char **temp_c_pt;
-
-    /* If the number of comments is zero, then no space 
-    has been allocated for the comments. Allocate some space: */
-    if (*num_comments==0)
-    {
-        *comments=malloc(*buff_num_comments*sizeof(char *)); 
-        if (*comments==NULL)
-        { 
-            printf("\n### ERROR: malloc failed to");
-            printf("create the comments in \"ForComments\".\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    /* Copy the comment line into the comments array 
-    and add to the number of comments.*/
-    (*comments)[*num_comments] = strdup(str);
-    (*num_comments)++;
-
     /* If it is getting longer than the actual length, 
     make the comments array longer: */
-    if (*num_comments>=*buff_num_comments) 
+    if ((long)(strlen(comments)+strlen(str))>=*buff_comments) 
     {
-        *buff_num_comments+=BUFFER_NUM;
-        temp_c_pt = realloc(*comments, *buff_num_comments*sizeof(char *));
-        if(temp_c_pt != NULL) *comments=temp_c_pt;
-        else 
+        *buff_comments+=BUFFER_NUM;
+        comments = realloc(comments, *buff_comments*sizeof(char));
+        if(comments != NULL)
         {
             printf("\n### Error: Comments array could");
             printf("not be reallocated in \"ForComments\".\n\n");
             exit(EXIT_FAILURE);
         }
-
     }
+
+    /* Copy the string into the */
+    strcat(comments, str);
 }
 
 void 
 CountCols(char *str, int *s1, double **table, 
-         long int buff_num_rows)
+        long int buff_num_rows)
 /********************************************
  *  Get the first data string and see how   *
  *  many columns of data there are in it.   * 
@@ -117,7 +83,7 @@ CountCols(char *str, int *s1, double **table,
 
 void 
 replacenan(struct ArrayInfo *intable, int col, char *strdata, 
-           long int *buff_num_replacements)
+        long int *buff_num_replacements)
 /********************************************
  *  This function will print a message      *
  *  notifying the user that a replacement   *
@@ -175,7 +141,7 @@ replacenan(struct ArrayInfo *intable, int col, char *strdata,
 
 void 
 AddRow(struct ArrayInfo *intable, long int *buff_num_rows, 
-       long int *buff_num_replacements, char *str)
+        long int *buff_num_replacements, char *str)
 /********************************************
  *  Knowing the number of columns, this     *
  *  function will read in each row          *
@@ -261,20 +227,8 @@ correctsizes(struct ArrayInfo *intable)
  * their last valuable element              *
  ********************************************/
 {
-    /* Shrink the comments array to the correct size: */
-    if (intable->nc!=0)
-    {
-        intable->c = realloc(intable->c, intable->nc*sizeof(char *));
-        if(intable->c == NULL)
-        {
-            printf("\n### Error: Comments array could ");
-            printf("not be reallocated.\n\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
     /* Shrink the data array to the correct size: */
-    if (intable->nc!=0)
+    if (intable->s0!=0 && intable->s1!=0)
     {
         intable->d=realloc(intable->d, intable->s0*intable->s1*sizeof(double));
         if(intable->d == NULL)
@@ -283,6 +237,15 @@ correctsizes(struct ArrayInfo *intable)
             printf("not be reallocated.\n\n");
             exit(EXIT_FAILURE);
         }
+    }
+
+    /* Shrink the comments array: */
+    intable->c=realloc(intable->c, strlen(intable->c)*sizeof(char));
+    if(intable->c == NULL)
+    {
+        printf("\n### Error: Comments could ");
+        printf("not be reallocated.\n\n");
+        exit(EXIT_FAILURE);
     }
 
     /* Shrink the replacements array: */
@@ -308,49 +271,47 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
  *  array. In order to use this function you        *
  *  have to initialize the comments and table       *
  *  variables,                                      *
- *--------------------------------------------------*
- *-- EXAMPLE (don't include the <-- --> sections):- *
- *------------------------------------------------- *
- * <----------------------------------------------->*  
- * <--          For the preprocessor             -->*
- * <----------------------------------------------->*  
- * #define MAX_ROW_CHARS 100000                     *
- * #define BUFFER_NUM 1000                          *
- * #define COMMENT_SIGN  '#'                        *
- * <----------------------------------------------->*   
- * <-- In the function you want to read an array -->*
- * <-- Make these declarations to keep the info  -->*
- * <----------------------------------------------->*   
- * input_name[]="./data/cat.txt";                   *
- * struct ArrayInfo intable;                        *
- * <----------------------------------------------->*  
- * <--             Call the function,            -->*
- * <--   All the data will be in the set in the  -->*
- * <--             structure elements            -->*
- * <----------------------------------------------->*
- * readasciitable(&input_name[0], &intable);        *
- * <----------------------------------------------->*   
- * <--    In case you want to see the results:   -->*
- * <----------------------------------------------->*   
- * int i,j;
- * for(i=0;i<intable.nc;i++) 
- *     printf("%s", intable.c[i]);
- * for(i=0;i<intable.s0;i++)
- * {
- *     for (j=0;j<intable.s1;j++) 
- *          printf("%-7.2f ", intable.d[i*intable.s1+j]);
- *     printf("\n");
- * }
- * printf("Table shape is: %d, %d\n", intable.s0, intable.s1);
- * printf("Number of comments: %d\n", intable.nc);
- * free(intable.d); free(intable.c);
- ***************************************************/
+ *                                                  *
+ *  Example program (using this and the header file)*
+ *  reading and writing file.                       *
+--------------------------------------------------- */
+#if 0   
+this is just for the preprocesser, ignore it!
+---------------------------------------------------
+#include <stdlib.h>
+#include "attaavv.h"
+
+int main (void)
+{
+    /* Definitions: */
+    char input_name[]="./data/cat.txt";
+    char output_name[]="tempcat.txt";
+    int int_cols[]={0,2,-1}, accu_cols[]={4,-1};
+    int space[]={5,10,15}, prec[]={6,8};
+
+    /* Declare the structure that will keep the array: */
+    struct ArrayInfo intable;
+
+    /* Read in the input data as an array:*/
+    readasciitable(input_name, &intable);
+
+    /* Print the table to a file */
+    writeasciitable(output_name, &intable, int_cols, 
+                    accu_cols, space, prec);
+
+    /* Free the space allocated to the 
+    comments and table arrays: */
+    freeasciitable(&intable);
+    return 0;
+}
+#endif
+ /***************************************************/
 {
     /* Declarations: */
-    long int line_counter=0;
-    long int buff_num_rows=BUFFER_NUM;
-    long int buff_num_comments=BUFFER_NUM;
-    long int buff_num_replacements=2*BUFFER_NUM; /* Has to be even */
+    long line_counter=0;
+    long buff_num_rows=BUFFER_NUM;
+    long buff_comments=BUFFER_NUM;
+    long buff_num_replacements=2*BUFFER_NUM; /* Has to be even */
     char str[MAX_ROW_CHARS];
     FILE *fp=fopen(filename, "r");
 
@@ -363,9 +324,9 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
 
     /* Initialize all the sizes in the structure 
     to zero for later steps */
+    intable->c=malloc(buff_comments*sizeof(char));
     intable->s0=0;
     intable->s1=0;
-    intable->nc=0;
     intable->nr=0;
     
     /* Go over the input file line by line and read
@@ -391,7 +352,7 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
 
         /* Incase the line is a comment line: */
         if(str[0]==COMMENT_SIGN) 
-            ForComments(&intable->c, &intable->nc, &buff_num_comments, str);
+           ForComments(intable->c, &buff_comments, str);
 
         /* If a line doesn't begin with a COMMENT_SIGN, it is 
         read as data and put into an array of data values. */
@@ -417,7 +378,6 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
     /* Report the result: */
     printf("\n\n----------------------\n");
     printf("Completed reading %s\n", filename);
-    printf("   Number of comment lines: %d.\n", intable->nc);
     printf("   Shape of table: (%d, %d).\n", intable->s0, intable->s1);
     printf("   Number of replaced elements: %ld.\n", intable->nr);
     printf("----------------------\n\n");
@@ -425,7 +385,7 @@ readasciitable (const char *filename, struct ArrayInfo *intable)
 
 void 
 DoFormatting(int numcols, char **fmt, char *fmt_all, int *int_cols, 
-             int *accu_cols, int *space, int *prec)
+        int *accu_cols, int *space, int *prec)
 /****************************************************
  ** This function gets the formatting settings     **
  ** of the array as required by writeasciitable    **
@@ -478,7 +438,7 @@ DoFormatting(int numcols, char **fmt, char *fmt_all, int *int_cols,
 
 void 
 writeasciitable (const char *filename, struct ArrayInfo *intable, 
-                 int *int_cols, int *accu_cols, int *space, int *prec)
+        int *int_cols, int *accu_cols, int *space, int *prec)
 /********************************************
  *  Write an array to an ascii file         * 
  *  The example bellow assumes your array   *
@@ -501,18 +461,8 @@ writeasciitable (const char *filename, struct ArrayInfo *intable,
  *         decimal point precision that will*
  *         be used for their printing in    *
  *         order.                           *
----------------------------------------------
-EXAMPLE:
-Assuming that the array was read in from
-readasciitable, this is how to run this function:
----------------------------------------------
-char output_name[]="tempcat.txt";
-int int_cols[]={0,4,-1}, accu_cols[]={1,2,-1};
-int space[]={5,10,15}, prec[]={3,8};
---------------------------------------------
-writeasciitable(&output_name[0], &intable, 
-        int_cols, accu_cols, space, prec);
-
+ * EXAMPLE:
+ *     look at the example in readasciitable*
 ********************************************/
 {
 
@@ -527,7 +477,8 @@ writeasciitable(&output_name[0], &intable,
     /* Check if the file opening was successful: */
     if (fp==NULL)
     {
-        printf("\n### Failed to open output file:"); 
+        printf("\n### attaavv.c: writeasciitable\n\
+               Failed to open output file:"); 
         printf("%s\n", filename);
         exit(EXIT_FAILURE);
     }
@@ -536,9 +487,8 @@ writeasciitable(&output_name[0], &intable,
     DoFormatting(intable->s1, fmt, fmt_all, int_cols, 
             accu_cols, space, prec);
 
-    /* Print the headers to file: */
-    for(i=0;i<intable->nc;i++)    
-        fprintf(fp, "%s", intable->c[i]);
+    /* Print the headers to file: */   
+    fprintf(fp, "%s", intable->c);
 
     /* Print the data to file: */
     for(i=0;i<intable->s0;i++)
@@ -548,11 +498,16 @@ writeasciitable(&output_name[0], &intable,
         fprintf(fp, "\n");
     }
 
+    /* Report the result: */
+    printf("\n\n----------------------\n");
+    printf("Completed writing %s\n", filename);
+    printf("   Shape of table: (%d, %d).\n", intable->s0, intable->s1);
+    printf("----------------------\n\n");
+
     /* Close the file and free all pointers: */
     free(fmt_all);free(fmt);
     fclose(fp);    
 }
-
 
 void 
 freeasciitable (struct ArrayInfo *intable)
@@ -561,7 +516,5 @@ freeasciitable (struct ArrayInfo *intable)
  ** during readasciitable                  **
  ********************************************/
 {
-    int i;
-    for(i=0;i<intable->nc;i++) free(intable->c[i]);
-    free(intable->d); free(intable->c);
+    free(intable->d); free(intable->r); free(intable->c);
 }

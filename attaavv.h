@@ -55,8 +55,7 @@ in the array "r". The X and Y position of each
 replacement is saved in this array contiguously.*/
 struct ArrayInfo 
 {
-    int         nc;  /* Number of comments */
-    char       **c;  /* Array of comments */
+    char        *c;  /* Array of comments */
     int         s0;  /* shape along zeroth axis */
     int         s1;  /* shape along first axis */
     double      *d;  /* data array (1D) */

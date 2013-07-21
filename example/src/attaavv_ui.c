@@ -26,7 +26,8 @@ int main (void)
     readasciitable(input_name, &intable);
 
     /* Print the table to a file */
-    writeasciitable(output_name, &intable, int_cols, accu_cols, space, prec);
+    writeasciitable(output_name, &intable, int_cols, 
+                    accu_cols, space, prec);
 
     /* Free the space allocated to the 
     comments and table arrays: */
