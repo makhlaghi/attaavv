@@ -50,17 +50,21 @@ Output structure
 ----------------------------------------
 The function fills in the ArrayInfo structure definition, declared
 in attaavv.h. Comments specified by the COMMENT_SIGN macro. 
-The components include (in order, member name is shown after ordered
-number): 
+The components of the structure are:
 
 ----  c: Comments string.
+
 ---- s0: Number of rows (zeroth axis) in the data table.
+
 ---- s1: Number of columns (first axis) in the data table.
+
 ----  d: Data array (1D).
+
 ---- nr: Number of replaced elements.
+
 ----  r: Array showing the positions of the replaced elements.
 
-The 5th element of the output structure (the data in the table) 
+The "d" element of the output structure (the data in the table) 
 is a 1D array containing all the data which you can use
 by indexing the output with [i*n2+j] where n2 is the second
 axis size and i and j are the first and second axis indexes 
