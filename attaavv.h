@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **********************************************************************/
 
-#ifndef FILEIO_H
-#define FILEIO_H
+#ifndef ATTAAVV_H
+#define ATTAAVV_H
 
 /* Make the macro definitions:
    MAX_ROW_CHARS specifies the maximum number of
@@ -40,10 +40,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       if it has value 0, the program will abort
       and notify the user.
 */
+#define MAXFILENAME 1000
 #define MAX_ROW_CHARS 100000
 #define BUFFER_NUM 1000
 #define CHAR_REPLACEMENT -9999
 #define COMMENT_SIGN  '#'
+#define MAXALLCOMMENTSLENGTH 5000
 
 /* The structure that is used to store the data: 
 The values in the shapes are counted from 1, so 
