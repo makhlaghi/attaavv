@@ -1,6 +1,14 @@
 attaavv
 =======
 
+attaavv is discontinued. Its core algorithms are now implemented in 
+GNU Astronomy Utilities:
+
+https://www.gnu.org/software/gnuastro/
+
+Please visit there for a much better user experience and more accurate
+programs.
+
 attaavv - ascii table to array and vice versa in C!
 
 ----------------------------------------
